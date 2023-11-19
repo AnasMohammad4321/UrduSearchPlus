@@ -1,6 +1,8 @@
 import os
 import json
 import re
+import nltk
+nltk.download('punkt')
 
 from file_operations import *
 from indexing import *

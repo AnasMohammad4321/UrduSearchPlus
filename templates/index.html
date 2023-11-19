@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/styles.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>Search Engine</title>
+</head>
+<body>
+
+  <div class="search-box">
+    <form id="search-form" action="/search" method="POST">
+      <button type="submit" class="btn-search"><i class="fas fa-search"></i></button>
+      <input type="text" name="query" class="input-search" placeholder="Type to Search...">
+    </form>
+  </div>
+
+  <footer>
+    <p>
+      Created with <i class="fa fa-heart"></i> by
+      <a target="_blank" href="https://codepen.io/ahmadbassamemran/">Ahmad Emran</a>
+      Follow me : 
+      <a target="_blank"  href="https://www.instagram.com/ahmadbassamemran/"><i class="fab fa-instagram"></i></a>
+      <a target="_blank"  href="https://www.linkedin.com/in/ahmademarn/"><i class="fab fa-linkedin"></i></a>
+      <a target="_blank" href="https://codepen.io/ahmadbassamemran/"><i class="fab fa-codepen"></i></a> 
+      <a target="_blank" href="https://dev.to/ahmadbassamemran"><i class="fab fa-dev"></i></a> 
+      <a target="_blank" href="https://twitter.com/ahmadbassamemra"><i class="fab fa-twitter-square"></i></a> 
+    </p>
+  </footer>
+
+  <div class="youtubeBtn">
+    <a target="_blank" href="https://www.youtube.com/AhmadEmran?sub_confirmation=1">
+      <span>Watch on YouTube</span>
+      <i class="fab fa-youtube"></i>
+    </a>
+  </div>
+
+  <!-- Display search results here -->
+  <div id="search-results"></div>
+
+  <script>
+    // JavaScript to handle AJAX request for search
+    document.getElementById('search-form').addEventListener('submit', function(event) {
+      event.preventDefault();
+      const formData = new FormData(this);
+
+      fetch('/search', {
+        method: 'POST',
+        body: formData
+      })
+      .then(response => response.json())
+      .then(data => {
+        const resultsContainer = document.getElementById('search-results');
+        resultsContainer.innerHTML = '<h2>Search Results:</h2>';
+
+        data.forEach(([doc_id, score]) => {
+          const resultItem = document.createElement('div');
+          resultItem.innerHTML = `<p>Document ID: ${doc_id}, TF-IDF Score: ${score}</p>`;
+          resultsContainer.appendChild(resultItem);
+        });
+      })
+      .catch(error => console.error('Error:', error));
+    });
+  </script>
+
+</body>
+</html>

@@ -2,6 +2,7 @@ import nltk
 from nltk.tokenize import word_tokenize
 import math
 import json
+import os
 
 
 def preprocess_query(query):
@@ -68,39 +69,35 @@ def calculate_tfidf_scores(query_term_ids, inverted_index, total_documents):
     return tfidf_scores
 
 
-def retrieve_documents(tfidf_scores, inverted_index):
-    """Retrieves relevant documents based on TF-IDF scores.
-
-    Args:
-        tfidf_scores (dict): Dictionary containing TF-IDF scores for documents.
-        inverted_index (dict): The inverted index containing document frequencies for terms.
-
-    Returns:
-        set: Set of relevant document IDs.
-    """
-    relevant_documents = set()
-
-    for term, idf in tfidf_scores.items():
-        if term in inverted_index:
-            relevant_documents.update(inverted_index[term])
-
-    return relevant_documents
-
-
-def print_ranked_documents(sorted_documents):
-    """Prints the ranked list of documents.
+def open_and_print_top_documents(sorted_documents, doc_id_mapping):
+    """Prints the first line of the top 10 ranked documents.
 
     Args:
         sorted_documents (list): List of tuples containing (doc_id, TF-IDF score).
+        doc_id_mapping (dict): Mapping of doc_id to document names.
     """
+    documents_folder = "Documents"  # Replace with the actual path to your Documents folder
+
     for rank, (doc_id, score) in enumerate(sorted_documents[:10], start=1):
-        print(f"Rank: {rank}, Document ID: {doc_id}, TF-IDF Score: {score}")
+        doc_name = doc_id_mapping.get(doc_id, f"Unknown Document {doc_id}")
+        doc_path = os.path.join(documents_folder, doc_name)
+
+        try:
+            with open(doc_path, 'r', encoding='utf-8') as doc_file:
+                first_line = doc_file.readline().strip()
+                print(f"Rank: {rank}, Document Name: {doc_name}, TF-IDF Score: {score}, First Line: {first_line}")
+        except FileNotFoundError:
+            print(f"Document not found: {doc_name}")
 
 
 def main():
     # Read the query from query.txt
     with open('query.txt', 'r', encoding='utf-8') as query_file:
         query_text = query_file.read()
+
+    # Read doc_id.json
+    with open('doc_id.json', 'r', encoding='utf-8') as doc_id_file:
+        doc_id = json.load(doc_id_file)
 
     # Read term_id.json
     with open('term_id.json', 'r', encoding='utf-8') as term_id_file:
@@ -111,7 +108,6 @@ def main():
         inverted_index = json.load(inverted_index_file)
 
     # Preprocess the query
-    query_text = "صورت حال"
     preprocessed_query = preprocess_query(query_text)
 
     # Map term IDs from terms in the preprocessed query
@@ -125,8 +121,8 @@ def main():
     # Sort the documents based on their TF-IDF scores in descending order
     sorted_documents = sorted(tfidf_scores.items(), key=lambda x: x[1], reverse=True)
 
-    # Print the top 10 ranked documents
-    print_ranked_documents(sorted_documents)
+    # Print the first line of the top 10 ranked documents
+    open_and_print_top_documents(sorted_documents, doc_id)
 
 
 if __name__ == "__main__":
